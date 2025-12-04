@@ -1,0 +1,72 @@
+name: precords_android
+description: "PRecords – Football Players & Clubs Management"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.10.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core
+  dio: ^5.9.0
+  flutter_secure_storage: ^9.2.4
+  get: ^4.7.3
+  flutter_dotenv: ^6.0.0
+  get_storage: ^2.1.1            # ← ADDED: for saving dark mode preference
+
+  # UI & UX
+  cupertino_icons: ^1.0.8
+  cached_network_image: ^3.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
+# name: precords_android
+# description: "PRecords – Football Players & Clubs Management"
+# publish_to: 'none'
+# version: 1.0.0+1
+
+# environment:
+#   sdk: ">=3.10.0 <4.0.0"
+
+# dependencies:
+#   flutter:
+#     sdk: flutter
+
+#   # Core (must-have)
+#   dio: ^5.9.0
+#   flutter_secure_storage: ^9.2.4
+#   get: ^4.7.3
+#   flutter_dotenv: ^6.0.0          # Loads .env (BASE_URL, etc.)
+
+#   # UI & UX
+#   cupertino_icons: ^1.0.8
+#   cached_network_image: ^3.4.1   # For fast, cached club logos
+
+#   # Optional (uncomment when you need them)
+#   # fluttertoast: ^8.2.8
+#   # image_picker: ^1.1.2
+#   # google_fonts: ^6.2.1
+
+# dev_dependencies:
+#   flutter_test:
+#     sdk: flutter
+#   flutter_lints: ^6.0.0
+
+# flutter:
+#   uses-material-design: true
+
+#   # Assets
+#   assets:
+#     - .env                         # Your environment variables
+#     # - assets/images/             # Uncomment when you add local images
+#     # - assets/icons/
