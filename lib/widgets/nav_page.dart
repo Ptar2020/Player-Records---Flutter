@@ -1,4 +1,3 @@
-// lib/widgets/nav_page.dart
 import 'package:flutter/material.dart';
 import 'app_bar_mixins.dart';
 

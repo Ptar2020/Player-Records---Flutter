@@ -1,4 +1,3 @@
-// lib/services/theme_service.dart
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -32,31 +31,3 @@ class ThemeService extends GetxService {
   IconData get themeIcon =>
       isDarkMode.value ? Icons.light_mode : Icons.dark_mode;
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:get_storage/get_storage.dart';
-
-// class ThemeService extends GetxService {
-//   final _box = GetStorage();
-//   final _key = 'isDarkMode';
-
-//   final RxBool isDarkMode = false.obs;
-
-//   @override
-//   void onInit() {
-//     super.onInit();
-//     isDarkMode.value = _box.read<bool>(_key) ?? false;
-//   }
-
-//   ThemeMode get theme => isDarkMode.value ? ThemeMode.dark : ThemeMode.light;
-
-//   void switchTheme() {
-//     isDarkMode.value = !isDarkMode.value;
-//     Get.changeThemeMode(theme);
-//     _box.write(_key, isDarkMode.value);
-//   }
-
-//   IconData get icon =>
-//       isDarkMode.value ? Icons.light_mode : Icons.dark_mode;
-// }
