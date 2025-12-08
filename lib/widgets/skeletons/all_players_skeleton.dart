@@ -118,9 +118,7 @@ class PlayerCardSkeleton extends StatelessWidget {
                           height: 24,
                           width: 90,
                           decoration: BoxDecoration(
-                            color: isDark
-                                ? Colors.deepPurple.shade900
-                                : Colors.deepPurple.shade50,
+                            color: Colors.grey,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),

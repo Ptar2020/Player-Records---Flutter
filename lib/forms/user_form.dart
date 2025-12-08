@@ -1,4 +1,3 @@
-// lib/widgets/user/user_form.dart
 import 'package:flutter/material.dart';
 import 'package:get/Get.dart';
 import 'package:precords_android/models/user_model.dart';
@@ -31,20 +30,21 @@ class _UserFormState extends State<UserForm> {
   bool loading = false;
   List<ClubModel> clubs = [];
   final List<String> roles = ["coach", "admin", "player"];
-
-  @override
+@override
   void initState() {
     super.initState();
 
-    usernameController =
-        TextEditingController(text: widget.user?.username ?? "");
-    emailController = TextEditingController(text: widget.user?.email ?? "");
-    nameController = TextEditingController(text: widget.user?.name ?? "");
-    phoneController = TextEditingController(text: widget.user?.phone ?? "");
+    final user = widget.user; // ← This prevents the null check error
+
+    usernameController = TextEditingController(text: user?.username ?? "");
+    emailController = TextEditingController(text: user?.email ?? "");
+    nameController = TextEditingController(
+        text: user?.name ?? ""); // ← WAS user?.username → BUG!
+    phoneController = TextEditingController(text: user?.phone ?? "");
     passwordController = TextEditingController();
 
-    selectedClubId = widget.user?.club;
-    selectedRole = widget.user?.role ?? "player";
+    selectedClubId = user?.club;
+    selectedRole = user?.role ?? "player";
 
     if (widget.clubs != null) {
       clubs = widget.clubs!;
@@ -52,6 +52,26 @@ class _UserFormState extends State<UserForm> {
       loadClubs();
     }
   }
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   usernameController =
+  //       TextEditingController(text: widget.user?.username ?? "");
+  //   emailController = TextEditingController(text: widget.user?.email ?? "");
+  //   nameController = TextEditingController(text: widget.user?.name ?? "");
+  //   phoneController = TextEditingController(text: widget.user?.phone ?? "");
+  //   passwordController = TextEditingController();
+
+  //   selectedClubId = widget.user?.club;
+  //   selectedRole = widget.user?.role ?? "player";
+
+  //   if (widget.clubs != null) {
+  //     clubs = widget.clubs!;
+  //   } else {
+  //     loadClubs();
+  //   }
+  // }
 
   Future<void> loadClubs() async {
     try {
@@ -429,6 +449,17 @@ class _UserFormState extends State<UserForm> {
     super.dispose();
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:precords_android/models/user_model.dart';

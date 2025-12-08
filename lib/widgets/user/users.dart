@@ -6,9 +6,7 @@ import 'package:precords_android/services/api_service.dart';
 import 'package:precords_android/services/auth_service.dart';
 import 'package:precords_android/widgets/refreshable_page.dart';
 import 'package:precords_android/forms/user_form.dart';
-import 'package:precords_android/widgets/skeletons/users_skeleton.dart';
 
-/// ---------------- REUSABLE TAG (dark-mode safe) ----------------
 class _Tag extends StatelessWidget {
   final String label;
   final Color color;
@@ -348,7 +346,7 @@ class _UsersState extends State<Users> with AutomaticKeepAliveClientMixin {
                   itemBuilder: (_, __) => const UserCardSkeleton(),
                 );
               }
-if (snapshot.connectionState == ConnectionState.waiting) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: 8,
@@ -357,22 +355,7 @@ if (snapshot.connectionState == ConnectionState.waiting) {
                       const UserCardSkeleton(), // ← Now from your new file
                 );
               }
-              // if (snapshot.hasError || !snapshot.hasData) {
-              //   return Center(
-              //     child: Column(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         Icon(Icons.error_outline,
-              //             size: 64, color: Colors.red.shade400),
-              //         const SizedBox(height: 16),
-              //         const Text("Failed to load users",
-              //             style: TextStyle(fontSize: 18)),
-              //         Text("${snapshot.error}",
-              //             style: TextStyle(color: Colors.red.shade400)),
-              //       ],
-              //     ),
-              //   );
-              // }
+        
 
               var users = snapshot.data!;
               if (!isAdmin) {

@@ -20,6 +20,7 @@ class BottomMenu extends StatefulWidget {
 class _BottomMenuState extends State<BottomMenu> {
   int selectedIndex = 0;
   final GlobalKey<AllPlayersState> allPlayersKey = GlobalKey<AllPlayersState>();
+  final GlobalKey<ClubsState> clubsKey = GlobalKey<ClubsState>();
 
   List<PopupMenuEntry<String>> get menuActions => const [
         PopupMenuItem(value: "refresh", child: Text("Refresh")),
@@ -105,12 +106,13 @@ class _BottomMenuState extends State<BottomMenu> {
           ]
         ),
       (
-        page: const Clubs(),
+        page: Clubs(key: clubsKey),
         title: "CLUBS",
         actions: [
           PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert, color: Colors.white),
-              onSelected: (value) {},
+              onSelected: (value) =>
+                  clubsKey.currentState?.handleMenuAction(value),
               itemBuilder: (_) => menuActions),
         ]
       ),

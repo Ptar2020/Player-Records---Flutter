@@ -34,7 +34,7 @@ class _SettingsState extends State<Settings> {
             onPressed: () {
               Get.back();
               Get.find<AuthService>().logout();
-              // Get.offAllNamed("/login");
+              // Get.offAllNamed("/players");
             },
             child: const Text("Logout", style: TextStyle(color: Colors.deepPurple)),
           ),

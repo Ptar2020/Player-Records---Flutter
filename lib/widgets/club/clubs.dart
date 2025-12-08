@@ -1,4 +1,3 @@
-// lib/widgets/club/clubs.dart
 import 'package:flutter/material.dart';
 import 'package:get/Get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,13 +14,45 @@ class Clubs extends StatefulWidget {
   State<Clubs> createState() => ClubsState();
 }
 
+
 class ClubsState extends State<Clubs> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+  // final ApiService api = Get.find<ApiService>();
+  List<ClubModel> clubs = [];
+  bool isLoading = true;
+  String? errorMessage;
+  
+
   final api = Get.find<ApiService>();
   late Future<List<ClubModel>> clubsFuture;
 
+  Future<void> loadClubs() async {
+    setState(() => isLoading = true);
+    try {
+      final fetched = await Get.find<ApiService>().getAllClubs();
+      setState(() {
+        clubs = fetched;
+      });
+    } catch (e) {
+      setState(
+          () => errorMessage = e.toString().replaceFirst("Exception: ", ""));
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void handleMenuAction(String action) {
+    if (action == "refresh") loadClubs();
+    if (action == "sort") {
+      // TODO: implement sorting
+    }
+    if (action == "filter") {
+      // TODO: implement filtering
+    }
+  }
+  
   @override
   void initState() {
     super.initState();
@@ -172,6 +203,13 @@ class ClubsState extends State<Clubs> with AutomaticKeepAliveClientMixin {
     );
   }
 }
+
+
+
+
+
+
+
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:precords_android/services/api_service.dart';
