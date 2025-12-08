@@ -1,3 +1,4 @@
+// lib/widgets/player/add_player.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -62,10 +63,8 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
   }
 
   Future<void> _uploadPhoto() async {
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
+    final picked =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
     if (picked == null) return;
 
     setState(() {
@@ -88,7 +87,8 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
       );
 
       setState(() => _photoUrl = res.data['secure_url']);
-      Fluttertoast.showToast(msg: "Photo uploaded");
+      Fluttertoast.showToast(
+          msg: "Photo uploaded", backgroundColor: Colors.green);
     } catch (e) {
       Fluttertoast.showToast(msg: "Upload failed", backgroundColor: Colors.red);
     } finally {
@@ -137,33 +137,53 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
     TextInputType keyboardType = TextInputType.text,
     String? Function(String?)? validator,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      style: TextStyle(color: theme.textTheme.bodyLarge?.color),
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        labelStyle: TextStyle(color: theme.textTheme.bodyMedium?.color),
+        prefixIcon: Icon(icon, color: theme.textTheme.bodyMedium?.color),
+        filled: true,
+        fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
         ),
-        filled: true,
-        fillColor: Colors.grey[100],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.deepPurple, width: 2),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final radius = 60.0;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.94,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      decoration: BoxDecoration(
+        color: theme.scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
         children: [
+          // Drag handle + Close
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
@@ -174,22 +194,29 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                   width: 50,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.grey[400],
+                    color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: Icon(Icons.close,
+                      color: theme.textTheme.bodyLarge?.color),
                   onPressed: () => Navigator.pop(context),
                 ),
               ],
             ),
           ),
-          const Text(
+
+          Text(
             "Add Player",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: theme.textTheme.titleLarge?.color,
+            ),
           ),
           const SizedBox(height: 20),
+
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -205,7 +232,9 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                         children: [
                           CircleAvatar(
                             radius: radius,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade200,
                             backgroundImage: _imageFile != null
                                 ? FileImage(File(_imageFile!.path))
                                 : (_photoUrl != null
@@ -213,36 +242,51 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                                     : null) as ImageProvider?,
                           ),
                           if (_isUploadingPhoto)
-                            const CircularProgressIndicator(),
+                            CircularProgressIndicator(
+                                color: theme.primaryColor),
                           if (_imageFile == null &&
                               _photoUrl == null &&
                               !_isUploadingPhoto)
                             Icon(
                               Icons.camera_alt,
                               size: 40,
-                              color: Colors.grey[700],
+                              color: isDark
+                                  ? Colors.white70
+                                  : Colors.grey.shade700,
                             ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 30),
 
-                    // Loading indicator while data loads
                     if (_isLoadingData)
                       const Center(child: CircularProgressIndicator())
                     else ...[
+                      // Club Dropdown
                       DropdownButtonFormField<String>(
                         value: _selectedClubId,
                         decoration: InputDecoration(
                           labelText: "Club *",
-                          prefixIcon: const Icon(Icons.sports_soccer),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          labelStyle: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color),
+                          prefixIcon: Icon(Icons.sports_soccer,
+                              color: theme.textTheme.bodyMedium?.color),
                           filled: true,
-                          fillColor: Colors.grey[100],
+                          fillColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                                color: isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300),
+                          ),
                         ),
                         hint: const Text("Select club"),
+                        dropdownColor: theme.cardColor,
                         items: _clubs
                             .map((c) => DropdownMenuItem(
                                 value: c.id, child: Text(c.name)))
@@ -251,18 +295,32 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                         validator: (v) => v == null ? "Required" : null,
                       ),
                       const SizedBox(height: 16),
+
+                      // Position Dropdown
                       DropdownButtonFormField<String>(
                         value: _selectedPositionId,
                         decoration: InputDecoration(
                           labelText: "Position",
-                          prefixIcon: const Icon(Icons.directions_run),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          labelStyle: TextStyle(
+                              color: theme.textTheme.bodyMedium?.color),
+                          prefixIcon: Icon(Icons.directions_run,
+                              color: theme.textTheme.bodyMedium?.color),
                           filled: true,
-                          fillColor: Colors.grey[100],
+                          fillColor: isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                                color: isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.grey.shade300),
+                          ),
                         ),
                         hint: const Text("Select position"),
+                        dropdownColor: theme.cardColor,
                         items: _positions.map((p) {
                           final id =
                               p['id']?.toString() ?? p['_id']?.toString() ?? "";
@@ -275,37 +333,35 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                       const SizedBox(height: 20),
                     ],
 
+                    // Text Fields
                     _buildTextField(
-                      controller: _nameCtrl,
-                      label: "Name *",
-                      icon: Icons.person,
-                      validator: (v) =>
-                          v?.trim().isEmpty ?? true ? "Required" : null,
-                    ),
+                        controller: _nameCtrl,
+                        label: "Name *",
+                        icon: Icons.person,
+                        validator: (v) =>
+                            v?.trim().isEmpty ?? true ? "Required" : null),
                     const SizedBox(height: 16),
                     _buildTextField(
-                      controller: _ageCtrl,
-                      label: "Age *",
-                      icon: Icons.cake,
-                      keyboardType: TextInputType.number,
-                      validator: (v) =>
-                          int.tryParse(v ?? "") == null ? "Valid age" : null,
-                    ),
+                        controller: _ageCtrl,
+                        label: "Age *",
+                        icon: Icons.cake,
+                        keyboardType: TextInputType.number,
+                        validator: (v) =>
+                            int.tryParse(v ?? "") == null ? "Valid age" : null),
                     const SizedBox(height: 16),
                     _buildTextField(
-                      controller: _nationalityCtrl,
-                      label: "Nationality",
-                      icon: Icons.flag,
-                    ),
+                        controller: _nationalityCtrl,
+                        label: "Nationality",
+                        icon: Icons.flag),
                     const SizedBox(height: 16),
                     _buildTextField(
-                      controller: _jerseyCtrl,
-                      label: "Jersey #",
-                      icon: Icons.confirmation_number,
-                      keyboardType: TextInputType.number,
-                    ),
+                        controller: _jerseyCtrl,
+                        label: "Jersey #",
+                        icon: Icons.confirmation_number,
+                        keyboardType: TextInputType.number),
                     const SizedBox(height: 40),
 
+                    // Submit Button
                     SizedBox(
                       width: double.infinity,
                       height: 56,
@@ -314,18 +370,14 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                              borderRadius: BorderRadius.circular(16)),
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                            : const Text(
-                                "Add Player",
+                                color: Colors.white)
+                            : const Text("Add Player",
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
-                              ),
+                                    fontSize: 18, color: Colors.white)),
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -348,8 +400,6 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
     super.dispose();
   }
 }
-
-
 // import 'dart:io';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
@@ -414,8 +464,10 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //   }
 
 //   Future<void> _uploadPhoto() async {
-//     final picked =
-//         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+//     final picked = await _picker.pickImage(
+//       source: ImageSource.gallery,
+//       imageQuality: 85,
+//     );
 //     if (picked == null) return;
 
 //     setState(() {
@@ -480,8 +532,32 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //     }
 //   }
 
+//   Widget _buildTextField({
+//     required TextEditingController controller,
+//     required String label,
+//     required IconData icon,
+//     TextInputType keyboardType = TextInputType.text,
+//     String? Function(String?)? validator,
+//   }) {
+//     return TextFormField(
+//       controller: controller,
+//       keyboardType: keyboardType,
+//       validator: validator,
+//       decoration: InputDecoration(
+//         labelText: label,
+//         prefixIcon: Icon(icon),
+//         border: OutlineInputBorder(
+//           borderRadius: BorderRadius.circular(16),
+//         ),
+//         filled: true,
+//         fillColor: Colors.grey[100],
+//       ),
+//     );
+//   }
+
 //   @override
 //   Widget build(BuildContext context) {
+//     final radius = 60.0;
 //     return Container(
 //       height: MediaQuery.of(context).size.height * 0.94,
 //       decoration: const BoxDecoration(
@@ -491,61 +567,83 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //       child: Column(
 //         children: [
 //           Padding(
-//             padding: const EdgeInsets.all(12),
+//             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
 //             child: Row(
 //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
 //               children: [
 //                 const SizedBox(width: 48),
 //                 Container(
-//                     width: 50,
-//                     height: 5,
-//                     decoration: BoxDecoration(
-//                         color: Colors.grey[400],
-//                         borderRadius: BorderRadius.circular(10))),
+//                   width: 50,
+//                   height: 5,
+//                   decoration: BoxDecoration(
+//                     color: Colors.grey[400],
+//                     borderRadius: BorderRadius.circular(10),
+//                   ),
+//                 ),
 //                 IconButton(
-//                     icon: const Icon(Icons.close),
-//                     onPressed: () => Navigator.pop(context)),
+//                   icon: const Icon(Icons.close),
+//                   onPressed: () => Navigator.pop(context),
+//                 ),
 //               ],
 //             ),
 //           ),
-//           const Text("Add Player",
-//               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+//           const Text(
+//             "Add Player",
+//             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+//           ),
 //           const SizedBox(height: 20),
 //           Expanded(
 //             child: SingleChildScrollView(
-//               padding: const EdgeInsets.all(20),
+//               padding: const EdgeInsets.symmetric(horizontal: 20),
 //               child: Form(
 //                 key: _formKey,
 //                 child: Column(
 //                   children: [
+//                     // Profile Photo
 //                     GestureDetector(
 //                       onTap: _uploadPhoto,
-//                       child: CircleAvatar(
-//                         radius: 60,
-//                         backgroundColor: Colors.grey[200],
-//                         backgroundImage: _imageFile != null
-//                             ? FileImage(File(_imageFile!.path))
-//                             : (_photoUrl != null
-//                                 ? NetworkImage(_photoUrl!)
-//                                 : null) as ImageProvider?,
-//                         child: _isUploadingPhoto
-//                             ? const CircularProgressIndicator()
-//                             : (_imageFile == null && _photoUrl == null)
-//                                 ? const Icon(Icons.camera_alt,
-//                                     size: 40, color: Colors.grey)
-//                                 : null,
+//                       child: Stack(
+//                         alignment: Alignment.center,
+//                         children: [
+//                           CircleAvatar(
+//                             radius: radius,
+//                             backgroundColor: Colors.grey[200],
+//                             backgroundImage: _imageFile != null
+//                                 ? FileImage(File(_imageFile!.path))
+//                                 : (_photoUrl != null
+//                                     ? NetworkImage(_photoUrl!)
+//                                     : null) as ImageProvider?,
+//                           ),
+//                           if (_isUploadingPhoto)
+//                             const CircularProgressIndicator(),
+//                           if (_imageFile == null &&
+//                               _photoUrl == null &&
+//                               !_isUploadingPhoto)
+//                             Icon(
+//                               Icons.camera_alt,
+//                               size: 40,
+//                               color: Colors.grey[700],
+//                             ),
+//                         ],
 //                       ),
 //                     ),
 //                     const SizedBox(height: 30),
+
+//                     // Loading indicator while data loads
 //                     if (_isLoadingData)
 //                       const Center(child: CircularProgressIndicator())
 //                     else ...[
 //                       DropdownButtonFormField<String>(
 //                         value: _selectedClubId,
-//                         decoration: const InputDecoration(
-//                             labelText: "Club *",
-//                             prefixIcon: Icon(Icons.sports_soccer),
-//                             border: OutlineInputBorder()),
+//                         decoration: InputDecoration(
+//                           labelText: "Club *",
+//                           prefixIcon: const Icon(Icons.sports_soccer),
+//                           border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16),
+//                           ),
+//                           filled: true,
+//                           fillColor: Colors.grey[100],
+//                         ),
 //                         hint: const Text("Select club"),
 //                         items: _clubs
 //                             .map((c) => DropdownMenuItem(
@@ -557,10 +655,15 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //                       const SizedBox(height: 16),
 //                       DropdownButtonFormField<String>(
 //                         value: _selectedPositionId,
-//                         decoration: const InputDecoration(
-//                             labelText: "Position",
-//                             prefixIcon: Icon(Icons.directions_run),
-//                             border: OutlineInputBorder()),
+//                         decoration: InputDecoration(
+//                           labelText: "Position",
+//                           prefixIcon: const Icon(Icons.directions_run),
+//                           border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16),
+//                           ),
+//                           filled: true,
+//                           fillColor: Colors.grey[100],
+//                         ),
 //                         hint: const Text("Select position"),
 //                         items: _positions.map((p) {
 //                           final id =
@@ -573,55 +676,58 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //                       ),
 //                       const SizedBox(height: 20),
 //                     ],
-//                     TextFormField(
-//                         controller: _nameCtrl,
-//                         decoration: const InputDecoration(
-//                             labelText: "Name *",
-//                             prefixIcon: Icon(Icons.person),
-//                             border: OutlineInputBorder()),
-//                         validator: (v) =>
-//                             v?.trim().isEmpty ?? true ? "Required" : null),
+
+//                     _buildTextField(
+//                       controller: _nameCtrl,
+//                       label: "Name *",
+//                       icon: Icons.person,
+//                       validator: (v) =>
+//                           v?.trim().isEmpty ?? true ? "Required" : null,
+//                     ),
 //                     const SizedBox(height: 16),
-//                     TextFormField(
-//                         controller: _ageCtrl,
-//                         keyboardType: TextInputType.number,
-//                         decoration: const InputDecoration(
-//                             labelText: "Age *",
-//                             prefixIcon: Icon(Icons.cake),
-//                             border: OutlineInputBorder()),
-//                         validator: (v) =>
-//                             int.tryParse(v ?? "") == null ? "Valid age" : null),
+//                     _buildTextField(
+//                       controller: _ageCtrl,
+//                       label: "Age *",
+//                       icon: Icons.cake,
+//                       keyboardType: TextInputType.number,
+//                       validator: (v) =>
+//                           int.tryParse(v ?? "") == null ? "Valid age" : null,
+//                     ),
 //                     const SizedBox(height: 16),
-//                     TextFormField(
-//                         controller: _nationalityCtrl,
-//                         decoration: const InputDecoration(
-//                             labelText: "Nationality",
-//                             prefixIcon: Icon(Icons.flag),
-//                             border: OutlineInputBorder())),
+//                     _buildTextField(
+//                       controller: _nationalityCtrl,
+//                       label: "Nationality",
+//                       icon: Icons.flag,
+//                     ),
 //                     const SizedBox(height: 16),
-//                     TextFormField(
-//                         controller: _jerseyCtrl,
-//                         keyboardType: TextInputType.number,
-//                         decoration: const InputDecoration(
-//                             labelText: "Jersey #",
-//                             prefixIcon: Icon(Icons.confirmation_number),
-//                             border: OutlineInputBorder())),
+//                     _buildTextField(
+//                       controller: _jerseyCtrl,
+//                       label: "Jersey #",
+//                       icon: Icons.confirmation_number,
+//                       keyboardType: TextInputType.number,
+//                     ),
 //                     const SizedBox(height: 40),
+
 //                     SizedBox(
 //                       width: double.infinity,
 //                       height: 56,
 //                       child: ElevatedButton(
 //                         onPressed: _isLoading ? null : _submit,
 //                         style: ElevatedButton.styleFrom(
-//                             backgroundColor: Colors.deepPurple,
-//                             shape: RoundedRectangleBorder(
-//                                 borderRadius: BorderRadius.circular(16))),
+//                           backgroundColor: Colors.deepPurple,
+//                           shape: RoundedRectangleBorder(
+//                             borderRadius: BorderRadius.circular(16),
+//                           ),
+//                         ),
 //                         child: _isLoading
 //                             ? const CircularProgressIndicator(
-//                                 color: Colors.white)
-//                             : const Text("Add Player",
+//                                 color: Colors.white,
+//                               )
+//                             : const Text(
+//                                 "Add Player",
 //                                 style: TextStyle(
-//                                     fontSize: 18, color: Colors.white)),
+//                                     fontSize: 18, color: Colors.white),
+//                               ),
 //                       ),
 //                     ),
 //                     const SizedBox(height: 30),
@@ -644,3 +750,4 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //     super.dispose();
 //   }
 // }
+

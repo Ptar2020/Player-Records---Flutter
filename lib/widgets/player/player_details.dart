@@ -94,13 +94,13 @@ class PlayerDetails extends StatelessWidget {
                 else
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.deepPurple,
                     child: Text(
                       player.initials,
                       style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple),
+                          color: Colors.white),
                     ),
                   ),
                 const SizedBox(width: 12),
