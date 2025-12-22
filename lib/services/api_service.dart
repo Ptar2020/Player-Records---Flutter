@@ -27,7 +27,7 @@ class AuthInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) async {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
     // Only process 401s
     if (err.response?.statusCode != 401) {
       return handler.next(err);
@@ -69,7 +69,7 @@ class AuthInterceptor extends Interceptor {
     _forceLogout(handler, err);
   }
 
-  void _forceLogout(ErrorInterceptorHandler handler, DioError err) {
+  void _forceLogout(ErrorInterceptorHandler handler, DioException err) {
     try {
       Get.find<AuthService>().logout();
     } catch (_) {}
@@ -83,6 +83,7 @@ class ApiService extends GetxService {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   String get baseUrl => dotenv.env['BASE_URL'] ?? '';
+  final auth = Get.find<AuthService>();
 
   @override
   Future<ApiService> init() async {
@@ -107,7 +108,26 @@ class ApiService extends GetxService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-// ================= NEW PLAYER ===============================
+  //================GET ALL PLAYERS ============================
+  Future<List<PlayerInClub>> getAllPlayers() async {
+    final r = await dio.get('/api/android/player');
+    final List data = r.data['data'] ?? [];
+    return data
+        .map((e) => PlayerInClub.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Player> getPlayerWithClub(String playerId) async {
+    final r = await dio.get('/api/android/player/$playerId');
+    final data = r.data['data'];
+    final playerJson = (data['player'] as Map<String, dynamic>);
+    final clubJson = data['club'] as Map<String, dynamic>?;
+    final playerInClub = PlayerInClub.fromJson(playerJson);
+    final club = clubJson != null ? ClubModel.fromJson(clubJson) : null;
+    return Player.fromPlayerInClub(playerInClub, club: club);
+  }
+
+// ============================= NEW PLAYER ===============================
   Future<void> createPlayer({
     required String clubId,
     required String name,
@@ -137,41 +157,76 @@ class ApiService extends GetxService {
     }
   }
 
-  //================GET ALL PLAYERS ============================
-  Future<List<PlayerInClub>> getAllPlayers() async {
-    final r = await dio.get('/api/android/player');
-    final List data = r.data['data'] ?? [];
-    return data
-        .map((e) => PlayerInClub.fromJson(e as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<Player> getPlayerWithClub(String playerId) async {
-    final r = await dio.get('/api/android/player/$playerId');
-    final data = r.data['data'];
-    final playerJson = (data['player'] as Map<String, dynamic>);
-    final clubJson = data['club'] as Map<String, dynamic>?;
-    final playerInClub = PlayerInClub.fromJson(playerJson);
-    final club = clubJson != null ? ClubModel.fromJson(clubJson) : null;
-    return Player.fromPlayerInClub(playerInClub, club: club);
-  }
-
 // ============================ UPDATE PLAYER ====================
-  Future<Player> updatePlayer(String id, Map<String, dynamic> updates) async {
+  Future<Player> updatePlayer(String id, dynamic updates) async {
     final response = await dio.patch(
       '/api/android/player/$id',
-      data: updates,
+      data: updates, // Dio automatically handles FormData vs JSON
     );
+
     if (response.data['success'] != true) {
       throw Exception(response.data['error'] ?? 'Update failed');
     }
-    return response.data['data'] != null
-        ? Player.fromPlayerInClub(
-            PlayerInClub.fromJson(
-                response.data['data'] as Map<String, dynamic>),
-            club: null,
-          )
-        : throw Exception('No player data returned');
+
+    if (response.data['data'] == null) {
+      throw Exception('No player data returned');
+    }
+
+    return Player.fromPlayerInClub(
+      PlayerInClub.fromJson(response.data['data'] as Map<String, dynamic>),
+      club: null,
+    );
+  }
+  // Future<Player> updatePlayer(String id, Map<String, dynamic> updates) async {
+  //   final response = await dio.patch(
+  //     '/api/android/player/$id',
+  //     data: updates,
+  //   );
+  //   if (response.data['success'] != true) {
+  //     throw Exception(response.data['error'] ?? 'Update failed');
+  //   }
+  //   return response.data['data'] != null
+  //       ? Player.fromPlayerInClub(
+  //           PlayerInClub.fromJson(
+  //               response.data['data'] as Map<String, dynamic>),
+  //           club: null,
+  //         )
+  //       : throw Exception('No player data returned');
+  // }
+
+  Future<void> deletePlayer(String id) async {
+    try {
+      final response = await dio.delete(
+        '/api/android/player/$id',
+        options: Options(responseType: ResponseType.plain),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return;
+      }
+
+      // If error, try to parse JSON error message
+      dynamic errorMsg = "Failed to delete player";
+      try {
+        final data = response.data;
+        errorMsg = data['error'] ?? errorMsg;
+      } catch (_) {}
+
+      throw Exception(errorMsg);
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      String message = e.response?.data is String
+          ? e.response!.data
+          : e.response?.data['error'] ?? e.message ?? 'Delete failed';
+
+      if (status == 401) throw Exception('Unauthorized access');
+      if (status == 403) throw Exception('Forbidden action');
+      if (status == 404) throw Exception('Player not found');
+
+      throw Exception(message);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   // ================GET ALL CLUBS=============================
@@ -182,7 +237,49 @@ class ApiService extends GetxService {
         .map((e) => ClubModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
+// //==================CREATE CLUB================================
+  //================CREATE CLUB=================================
 
+  Future<ClubModel> createClub({
+    required String name,
+    required String country,
+    String? logo,
+    String? level,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/api/android/club',
+        data: {
+          "name": name.trim(),
+          "country": country.trim(),
+          "logo": logo,
+          "level": level,
+        },
+      );
+
+      if (response.data['success'] != true) {
+        throw Exception(response.data['error'] ?? 'Failed to create club');
+      }
+
+      // Extract the club data from response
+      final clubData = response.data['data'] ?? response.data['club'];
+
+      if (clubData == null) {
+        throw Exception('No club data returned from server');
+      }
+
+      // Convert to ClubModel and return
+      return ClubModel.fromJson(clubData as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final errorMsg =
+          e.response?.data?['error'] ?? e.message ?? 'Network error';
+      throw Exception('Create club failed: $errorMsg');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+//==================GET CLUB DETAILS BY NAME ===========
   Future<ClubModel> getClubDetailsByName(String clubName) async {
     final encoded = Uri.encodeComponent(clubName);
     final r = await dio.get('/api/android/club/$encoded');
@@ -198,14 +295,14 @@ class ApiService extends GetxService {
         .toList();
   }
 
-// ======================= NEW: USER =========================
+// ============================= NEW: USER =========================
   Future<UserModel> registerUser(Map<String, dynamic> data) async {
     final user = await dio.post('/api/android/user/register', data: data);
     final userData = user.data['data']['user'];
     return UserModel.fromJson(userData as Map<String, dynamic>);
   }
 
-// ============================ UPDATE USER ====================
+// ============================ UPDATE USER ========================
   Future<UserModel> updateUser(String id, Map<String, dynamic> updates) async {
     final response = await dio.patch(
       '/api/android/user/$id',
@@ -217,19 +314,33 @@ class ApiService extends GetxService {
     return UserModel.fromJson(response.data['data']);
   }
 
-//   Future<UserModel> updateUser(String id, Map<String, dynamic> updates) async {
-//     try {
-//       final r = await dio.patch('/api/android/user/$id', data: updates);
-//       if (r.data['success'] == true) {
-//         return UserModel.fromJson(r.data['data'] as Map<String, dynamic>);
-//       } else {
-//         throw Exception(r.data['error'] ?? 'Failed to update user');
-//       }
-//     } on DioError catch (e) {
-//       final msg = e.response?.data is Map
-//           ? e.response?.data['error'] ?? 'Failed to update user'
-//           : 'Network error';
-//       throw Exception(msg);
-//     }
-//   }
+// ============================ DELETE USER ========================
+  Future<void> deleteUser(String id) async {
+    try {
+      final response = await dio.delete(
+        '/api/android/user/$id',
+      );
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception(
+          response.data['error'] ?? "Failed to delete user",
+        );
+      }
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final message = e.response?.data['error'] ?? e.message;
+      if (status == 401) {
+        throw Exception('Unathorized access');
+      } else if (status == 403) {
+        throw Exception('Forbidden action');
+      } else if (status == 404) {
+        throw Exception('User not found');
+      } else {
+        throw Exception(message ?? 'Delete failed');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -1,4 +1,3 @@
-// lib/widgets/skeletons/all_players_skeleton.dart
 import 'package:flutter/material.dart';
 
 class PlayerCardSkeleton extends StatelessWidget {

@@ -1,4 +1,3 @@
-// lib/widgets/player/add_player.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,14 +9,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../services/api_service.dart';
 import '../../models/club_model.dart';
 
-class AddPlayerScreen extends StatefulWidget {
-  const AddPlayerScreen({Key? key}) : super(key: key);
+class AddPlayerModal extends StatefulWidget {
+  const AddPlayerModal({super.key});
 
   @override
-  State<AddPlayerScreen> createState() => _AddPlayerScreenState();
+  State<AddPlayerModal> createState() => _AddPlayerScreenState();
 }
 
-class _AddPlayerScreenState extends State<AddPlayerScreen> {
+class _AddPlayerScreenState extends State<AddPlayerModal> {
   final _formKey = GlobalKey<FormState>();
   final ApiService api = Get.find<ApiService>();
   final ImagePicker _picker = ImagePicker();
@@ -31,7 +30,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 
   final _nameCtrl = TextEditingController();
   final _ageCtrl = TextEditingController();
-  final _nationalityCtrl = TextEditingController(text: "Unknown");
+  final _nationalityCtrl = TextEditingController(text: "");
   final _jerseyCtrl = TextEditingController();
 
   String? _selectedClubId;
@@ -56,7 +55,12 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
         _positions = positions;
       });
     } catch (e) {
-      Fluttertoast.showToast(msg: "Load failed", backgroundColor: Colors.red);
+      Fluttertoast.showToast(
+          msg: "Failed to load players",
+          textColor: Colors.white54,
+          backgroundColor: Colors.black);
+
+      // Fluttertoast.showToast(msg: "Load failed", backgroundColor: Colors.red);
     } finally {
       setState(() => _isLoadingData = false);
     }
@@ -264,7 +268,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
                     else ...[
                       // Club Dropdown
                       DropdownButtonFormField<String>(
-                        value: _selectedClubId,
+                        initialValue: _selectedClubId,
                         decoration: InputDecoration(
                           labelText: "Club *",
                           labelStyle: TextStyle(
@@ -298,7 +302,7 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 
                       // Position Dropdown
                       DropdownButtonFormField<String>(
-                        value: _selectedPositionId,
+                        initialValue: _selectedPositionId,
                         decoration: InputDecoration(
                           labelText: "Position",
                           labelStyle: TextStyle(
@@ -400,6 +404,13 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
     super.dispose();
   }
 }
+
+
+
+
+
+
+
 // import 'dart:io';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
@@ -411,14 +422,14 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 // import '../../services/api_service.dart';
 // import '../../models/club_model.dart';
 
-// class AddPlayerScreen extends StatefulWidget {
-//   const AddPlayerScreen({Key? key}) : super(key: key);
+// class AddPlayerModal extends StatefulWidget {
+//   const AddPlayerModal({Key? key}) : super(key: key);
 
 //   @override
-//   State<AddPlayerScreen> createState() => _AddPlayerScreenState();
+//   State<AddPlayerModal> createState() => _AddPlayerScreenState();
 // }
 
-// class _AddPlayerScreenState extends State<AddPlayerScreen> {
+// class _AddPlayerScreenState extends State<AddPlayerModal> {
 //   final _formKey = GlobalKey<FormState>();
 //   final ApiService api = Get.find<ApiService>();
 //   final ImagePicker _picker = ImagePicker();
@@ -750,4 +761,3 @@ class _AddPlayerScreenState extends State<AddPlayerScreen> {
 //     super.dispose();
 //   }
 // }
-

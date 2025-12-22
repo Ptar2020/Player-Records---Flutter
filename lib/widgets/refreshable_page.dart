@@ -7,10 +7,10 @@ class RefreshablePage extends StatelessWidget {
   final RefreshCallback onRefresh;
 
   const RefreshablePage({
-    Key? key,
+    super.key,
     required this.child,
     required this.onRefresh,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

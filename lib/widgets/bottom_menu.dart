@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:precords_android/widgets/player/add_player.dart';
@@ -8,7 +7,7 @@ import 'package:precords_android/widgets/club/clubs.dart';
 import 'package:precords_android/widgets/settings.dart';
 import 'package:precords_android/widgets/user/auth/login.dart';
 import 'package:precords_android/services/auth_service.dart';
-import 'package:precords_android/services/theme_service.dart'; // Add this import
+import 'package:precords_android/services/theme_service.dart';
 
 class BottomMenu extends StatefulWidget {
   const BottomMenu({super.key});
@@ -33,7 +32,7 @@ class _BottomMenuState extends State<BottomMenu> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => const AddPlayerScreen(),
+      builder: (_) => const AddPlayerModal(),
     ).then((shouldRefresh) {
       if (shouldRefresh == true) allPlayersKey.currentState?.loadPlayers();
     });
@@ -252,7 +251,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) allPlayersKey.currentState?.loadPlayers();
 //     });
@@ -448,7 +447,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) allPlayersKey.currentState?.loadPlayers();
 //     });
@@ -651,7 +650,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) allPlayersKey.currentState?.loadPlayers();
 //     });
@@ -852,7 +851,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) {
 //         allPlayersKey.currentState?.loadPlayers();
@@ -1085,7 +1084,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) {
 //         allPlayersKey.currentState?.loadPlayers();
@@ -1252,7 +1251,7 @@ class _BottomMenuState extends State<BottomMenu> {
 //       context: context,
 //       isScrollControlled: true,
 //       backgroundColor: Colors.transparent,
-//       builder: (_) => const AddPlayerScreen(),
+//       builder: (_) => const AddPlayerModal(),
 //     ).then((shouldRefresh) {
 //       if (shouldRefresh == true) {
 //         allPlayersKey.currentState?.loadPlayers();

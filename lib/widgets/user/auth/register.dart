@@ -47,9 +47,7 @@ class _RegisterState extends State<Register> {
       phone: _phoneController.text.trim().isEmpty
           ? null
           : _phoneController.text.trim(),
-      role: _selectedRole == 'coach'
-          ? _selectedRole
-          : _selectedRole, // just pass it
+      role: _selectedRole,
     );
 
     setState(() => _isLoading = false);
@@ -57,7 +55,7 @@ class _RegisterState extends State<Register> {
     if (success && mounted) {
       Get.snackbar(
         "Success!",
-        "Account created successfully! You can now log in.",
+        "Account created successfully!",
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -65,8 +63,8 @@ class _RegisterState extends State<Register> {
     } else {
       Get.snackbar(
         "Error",
-        authService.errorMessage ?? "Registration failed",
-        backgroundColor: Colors.red,
+        authService.errorMessage,
+        backgroundColor: Colors.black54,
         colorText: Colors.white,
       );
     }
@@ -74,7 +72,6 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    // Your build method is perfect — no changes needed
     return Scaffold(
       appBar: AppBar(title: const Text("Create Account"), centerTitle: true),
       body: SingleChildScrollView(
@@ -83,9 +80,7 @@ class _RegisterState extends State<Register> {
           key: _formKey,
           child: Column(
             children: [
-            
               const SizedBox(height: 25),
-
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -96,7 +91,6 @@ class _RegisterState extends State<Register> {
                     v?.trim().isEmpty == true ? "Name is required" : null,
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(
@@ -107,7 +101,6 @@ class _RegisterState extends State<Register> {
                     v?.trim().isEmpty == true ? "Username is required" : null,
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -122,7 +115,6 @@ class _RegisterState extends State<Register> {
                 },
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
@@ -132,7 +124,6 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _passwordController,
                 obscureText: true,
@@ -145,9 +136,8 @@ class _RegisterState extends State<Register> {
                     : null,
               ),
               const SizedBox(height: 20),
-
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: const InputDecoration(
                   labelText: "Role",
                   prefixIcon: Icon(Icons.badge),
@@ -160,7 +150,6 @@ class _RegisterState extends State<Register> {
                 onChanged: (value) => setState(() => _selectedRole = value!),
               ),
               const SizedBox(height: 30),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -175,10 +164,9 @@ class _RegisterState extends State<Register> {
                 ),
               ),
               const SizedBox(height: 20),
-
               TextButton(
                 onPressed: () => Get.offAllNamed('/login'),
-                child: const Text("Already have an account? Log in"),
+                child: const Text("Already registered? Log in"),
               ),
             ],
           ),

@@ -129,7 +129,6 @@ class ClubDetailsScreen extends StatelessWidget {
                     children: [
                       _compactInfo(Icons.flag,
                           "${_countryCodeToFlag(fullClub.country ?? "??")} ${fullClub.country ?? "—"}"),
-                      _compactInfo(Icons.location_city, fullClub.city ?? "—"),
                       _compactInfo(Icons.emoji_events, fullClub.level ?? "—"),
                     ],
                   ),

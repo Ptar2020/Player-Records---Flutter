@@ -123,14 +123,14 @@ class UserCardFinal extends StatelessWidget {
                   child: Text(
                     user.email ?? "—",
                     style: TextStyle(
-                        fontSize: 14, color: textColor?.withOpacity(0.8)),
+                        fontSize: 14, color: textColor.withOpacity(0.8)),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     user.phone ?? "—",
                     style: TextStyle(
-                        fontSize: 14, color: textColor?.withOpacity(0.8)),
+                        fontSize: 14, color: textColor.withOpacity(0.8)),
                   ),
                 ),
               ],
@@ -329,7 +329,7 @@ class _UsersState extends State<Users> with AutomaticKeepAliveClientMixin {
     super.build(context);
 
     final currentUser = auth.currentUser;
-    final isAdmin = currentUser?.role?.toLowerCase() == 'admin';
+    final isAdmin = currentUser?.role.toLowerCase() == 'admin';
 
     return RefreshablePage(
       onRefresh: refresh,

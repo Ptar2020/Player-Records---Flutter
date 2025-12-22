@@ -1,10 +1,9 @@
-
 import 'club_model.dart';
 
 class Player {
   final String id;
   final String name;
-  final String age;
+  final int? age;
   final String country;
   final String? photo;
   final Position? position;
@@ -17,7 +16,7 @@ class Player {
   Player({
     required this.id,
     required this.name,
-    required this.age,
+    this.age,
     required this.country,
     this.photo,
     this.position,
@@ -32,7 +31,7 @@ class Player {
     return Player(
       id: p.id,
       name: (p.name?.trim().isNotEmpty == true) ? p.name! : "Unknown Player",
-      age: (p.age?.trim().isNotEmpty == true) ? p.age! : "??",
+      age: p.age != null ? int.tryParse(p.age!) : null,
       country: (p.country?.trim().isNotEmpty == true) ? p.country! : "Unknown",
       photo: (p.photo?.trim().isNotEmpty == true) ? p.photo!.trim() : null,
       position: p.position,
@@ -60,7 +59,8 @@ class Player {
 
   // helper for initials (cached by caller if needed)
   String get initials {
-    final parts = name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
     if (parts.isEmpty) return "?";
     final extracted = parts.map((e) => e[0]).take(2).join().toUpperCase();
     return extracted;
@@ -132,10 +132,15 @@ class PlayerInClub {
       photo: json['photo'] as String?,
       jerseyNumber: json['jerseyNumber'] is int
           ? json['jerseyNumber'] as int
-          : (json['jerseyNumber'] is String ? int.tryParse(json['jerseyNumber']) : null),
-      position: json['position'] != null ? Position.fromJson(json['position'] as Map<String, dynamic>) : null,
-      club: json['club'] != null ? ClubModel.fromJson(json['club'] as Map<String, dynamic>) : null,
+          : (json['jerseyNumber'] is String
+              ? int.tryParse(json['jerseyNumber'])
+              : null),
+      position: json['position'] != null
+          ? Position.fromJson(json['position'] as Map<String, dynamic>)
+          : null,
+      club: json['club'] != null
+          ? ClubModel.fromJson(json['club'] as Map<String, dynamic>)
+          : null,
     );
   }
 }
-
