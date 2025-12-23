@@ -124,7 +124,7 @@ class ApiService extends GetxService {
     final clubJson = data['club'] as Map<String, dynamic>?;
     final playerInClub = PlayerInClub.fromJson(playerJson);
     final club = clubJson != null ? ClubModel.fromJson(clubJson) : null;
-    return Player.fromPlayerInClub(playerInClub, club: club);
+    return Player.fromPlayerInClub(playerInClub);
   }
 
 // ============================= NEW PLAYER ===============================
@@ -135,6 +135,9 @@ class ApiService extends GetxService {
     required String country,
     String? photo,
     String? positionId,
+    String? gender,
+    String? phone,
+    String? email,
     int? jerseyNumber,
   }) async {
     try {
@@ -145,6 +148,9 @@ class ApiService extends GetxService {
         "country": country.trim(),
         "photo": photo,
         "position": positionId,
+        "gender": gender,
+        "phone": phone,
+        "email": email,
         "jerseyNumber": jerseyNumber,
       });
 
@@ -174,25 +180,10 @@ class ApiService extends GetxService {
 
     return Player.fromPlayerInClub(
       PlayerInClub.fromJson(response.data['data'] as Map<String, dynamic>),
-      club: null,
+      // club: null,
     );
   }
-  // Future<Player> updatePlayer(String id, Map<String, dynamic> updates) async {
-  //   final response = await dio.patch(
-  //     '/api/android/player/$id',
-  //     data: updates,
-  //   );
-  //   if (response.data['success'] != true) {
-  //     throw Exception(response.data['error'] ?? 'Update failed');
-  //   }
-  //   return response.data['data'] != null
-  //       ? Player.fromPlayerInClub(
-  //           PlayerInClub.fromJson(
-  //               response.data['data'] as Map<String, dynamic>),
-  //           club: null,
-  //         )
-  //       : throw Exception('No player data returned');
-  // }
+
 
   Future<void> deletePlayer(String id) async {
     try {
