@@ -1,12 +1,12 @@
 class UserModel {
   final String? id;
   final String username;
-  final String name; // <-- REQUIRED (from DB)
+  final String name; 
   final String? email;
   final String? phone;
-  final String? club; // Club ID
-  final String? clubName; // when populated
-  final String role; // <-- MUST NOT BE NULL
+  final String? club;
+  final String? clubName; 
+  final String role; 
   final DateTime? createdAt;
   final bool isActive;
 

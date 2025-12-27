@@ -178,7 +178,7 @@ class AllPlayersState extends State<AllPlayers> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              player.name ?? "Unknown Player",
+                              player.name ?? " Player",
                               style: const TextStyle(
                                   fontSize: 17.5, fontWeight: FontWeight.bold),
                               maxLines: 1,
@@ -280,10 +280,16 @@ class AllPlayersState extends State<AllPlayers> {
                               itemBuilder: (_) => const [
                                 PopupMenuItem(
                                   value: 'delete',
-                                  child: Row(
+                                  child: Column(
                                     children: [
-                                      Icon(Icons.delete, color: Colors.red),
-                                      SizedBox(width: 8),
+                                      Text("View",
+                                          style:
+                                              TextStyle(color: Colors.green)),
+                                      SizedBox(height: 8),
+                                      Text("Edit",
+                                          style:
+                                              TextStyle(color: Colors.purple)),
+                                      SizedBox(height: 8),
                                       Text("Delete",
                                           style: TextStyle(color: Colors.red)),
                                     ],
@@ -309,7 +315,7 @@ class AllPlayersState extends State<AllPlayers> {
     if (isLoading) {
       return ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
-        itemCount: 7,
+        itemCount: 5,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (_, __) => const PlayerCardSkeleton(),
       );

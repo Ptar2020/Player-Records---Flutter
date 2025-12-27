@@ -3,7 +3,6 @@ import 'package:get/Get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:precords_android/models/club_model.dart';
 import 'package:precords_android/models/player_model.dart';
-import 'package:precords_android/widgets/club/clubs.dart';
 import 'package:precords_android/widgets/player/player_details.dart';
 import 'package:precords_android/services/api_service.dart';
 import 'package:precords_android/services/auth_service.dart';
@@ -27,7 +26,7 @@ class ClubDetailsScreen extends StatelessWidget {
   int get _playerCount =>
       fullClub.players?.length ?? fullClub.playersCount ?? 0;
 
-  void _deleteClub(BuildContext context) async {
+void _deleteClub(BuildContext context) async {
     final auth = Get.find<AuthService>();
     final api = Get.find<ApiService>();
 
@@ -65,18 +64,13 @@ class ClubDetailsScreen extends StatelessWidget {
     try {
       await api.deleteClub(fullClub.id);
       Get.back();
-
-      // Show success message
       Get.snackbar("Success", "Club deleted successfully",
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 2));
+          backgroundColor: Colors.green, colorText: Colors.white);
 
-      // Get.back();
+      Get.back(); 
 
-      // Refresh the Clubs list after a tiny delay to ensure navigation completed
-      Future.delayed(const Duration(milliseconds: 15), () {
-        Get.back(); //I doubt if working
+      // Refresh the Clubs list after a tiny delay to ensure we're back
+      Future.delayed(const Duration(milliseconds: 20), () {
         clubsGlobalKey.currentState?.refresh();
       });
     } catch (e) {
@@ -84,12 +78,10 @@ class ClubDetailsScreen extends StatelessWidget {
           backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
-  
+
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'ClubDetails received club: ${fullClub.name} (ID: ${fullClub.id}), Players: ${fullClub.players?.length ?? 0}');
     final isTablet = MediaQuery.of(context).size.width > 600;
     final auth = Get.find<AuthService>();
     final isAdmin = auth.currentUser?.role.toLowerCase() == 'admin';
@@ -254,9 +246,28 @@ class ClubDetailsScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _compactInfo(Icons.flag,
-                          "${_countryCodeToFlag(fullClub.country ?? "??")} ${fullClub.country ?? "—"}"),
-                      _compactInfo(Icons.emoji_events, fullClub.level ?? "—"),
+                      Column(
+                        children: [
+                          Icon(Icons.flag,
+                              color: Colors.deepPurple[700], size: 28),
+                          const SizedBox(height: 6),
+                          Text(
+                              "${_countryCodeToFlag(fullClub.country ?? "??")} ${fullClub.country ?? "—"}",
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600),
+                              textAlign: TextAlign.center),
+                        ],
+                      ),
+                      Column(
+                        children: [
+                          Icon(Icons.emoji_events,
+                              color: Colors.deepPurple[700], size: 28),
+                          const SizedBox(height: 6),
+                          Text(fullClub.level ?? "—",
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -271,7 +282,7 @@ class ClubDetailsScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    "PLAYERS",
+                    "SQUAD",
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -299,7 +310,7 @@ class ClubDetailsScreen extends StatelessWidget {
             ),
           ),
 
-          // Players list
+          // Players list or empty state
           fullClub.players == null || fullClub.players!.isEmpty
               ? SliverToBoxAdapter(
                   child: Padding(
@@ -316,7 +327,125 @@ class ClubDetailsScreen extends StatelessWidget {
                     (context, index) {
                       final p = fullClub.players![index];
                       final fullPlayer = Player.fromPlayerInClub(p);
-                      return _compactPlayerCard(p, fullPlayer, isTablet);
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => Get.to(
+                            () => PlayerDetails(player: fullPlayer),
+                            transition: Transition.zoom),
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 5),
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 36,
+                                      backgroundColor:
+                                          Colors.deepPurple.shade50,
+                                      backgroundImage: p.photo?.isNotEmpty ==
+                                              true
+                                          ? CachedNetworkImageProvider(p.photo!)
+                                          : null,
+                                      child: p.photo?.isNotEmpty != true
+                                          ? Text(fullPlayer.initials,
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.deepPurple))
+                                          : null,
+                                    ),
+                                    if (p.jerseyNumber != null)
+                                      Positioned(
+                                        bottom: -2,
+                                        right: -2,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: const BoxDecoration(
+                                              color: Colors.deepPurple,
+                                              shape: BoxShape.circle),
+                                          child: Text("${p.jerseyNumber}",
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold)),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        p.name ?? "Unknown",
+                                        style: const TextStyle(
+                                            fontSize: 16.5,
+                                            fontWeight: FontWeight.bold),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          if (p.age?.isNotEmpty == true) ...[
+                                            Text(p.age!,
+                                                style: const TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.grey)),
+                                            const Text(" • ",
+                                                style: TextStyle(
+                                                    color: Colors.grey)),
+                                          ],
+                                          if (p.position?.name != null)
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 2),
+                                              decoration: BoxDecoration(
+                                                  color: Colors
+                                                      .deepPurple.shade100,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10)),
+                                              child: Text(
+                                                p.position!.shortName ??
+                                                    p.position!.name,
+                                                style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        Colors.deepPurple[900]),
+                                              ),
+                                            ),
+                                          if (p.country != null) ...[
+                                            const Text(" • ",
+                                                style: TextStyle(
+                                                    color: Colors.grey)),
+                                            Text(_countryCodeToFlag(p.country!),
+                                                style: const TextStyle(
+                                                    fontSize: 18)),
+                                          ],
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.chevron_right,
+                                    color: Colors.grey, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
                     },
                     childCount: fullClub.players!.length,
                   ),
@@ -325,120 +454,6 @@ class ClubDetailsScreen extends StatelessWidget {
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
-    );
-  }
-
-  Widget _compactPlayerCard(PlayerInClub p, Player fullPlayer, bool isTablet) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: () => Get.to(() => PlayerDetails(player: fullPlayer),
-          transition: Transition.zoom),
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Colors.deepPurple.shade50,
-                    backgroundImage: p.photo?.isNotEmpty == true
-                        ? CachedNetworkImageProvider(p.photo!)
-                        : null,
-                    child: p.photo?.isNotEmpty != true
-                        ? Text(fullPlayer.initials,
-                            style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple))
-                        : null,
-                  ),
-                  if (p.jerseyNumber != null)
-                    Positioned(
-                      bottom: -2,
-                      right: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                            color: Colors.deepPurple, shape: BoxShape.circle),
-                        child: Text("${p.jerseyNumber}",
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      p.name ?? "Unknown",
-                      style: const TextStyle(
-                          fontSize: 16.5, fontWeight: FontWeight.bold),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        if (p.age?.isNotEmpty == true) ...[
-                          Text(p.age!,
-                              style: const TextStyle(
-                                  fontSize: 13, color: Colors.grey)),
-                          const Text(" • ",
-                              style: TextStyle(color: Colors.grey)),
-                        ],
-                        if (p.position?.name != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                                color: Colors.deepPurple.shade100,
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Text(
-                              p.position!.shortName ?? p.position!.name,
-                              style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.deepPurple[900]),
-                            ),
-                          ),
-                        if (p.country != null) ...[
-                          const Text(" • ",
-                              style: TextStyle(color: Colors.grey)),
-                          Text(_countryCodeToFlag(p.country!),
-                              style: const TextStyle(fontSize: 18)),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _compactInfo(IconData icon, String value) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.deepPurple[700], size: 28),
-        const SizedBox(height: 6),
-        Text(value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            textAlign: TextAlign.center),
-      ],
     );
   }
 }

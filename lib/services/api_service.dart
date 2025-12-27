@@ -220,10 +220,11 @@ class ApiService extends GetxService {
     }
   }
 
-// ================GET ALL CLUBS=============================
+//========================  GET ALL CLUBS=============================
   Future<List<ClubModel>> getAllClubs() async {
     final club = await dio.get('/api/android/club');
     final List data = club.data['data'] ?? [];
+    print("CLUB DATA FROM /api/android/club - ${data}");
     return data
         .map((e) => ClubModel.fromJson(e as Map<String, dynamic>))
         .toList();

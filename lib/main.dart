@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:precords_android/controllers/club_controller.dart';
+import 'package:precords_android/controllers/user_controller.dart';
 
 import 'services/api_service.dart';
 import 'services/auth_service.dart';
@@ -28,7 +30,8 @@ Future<void> main() async {
 
   // 6. ThemeService
   Get.put<ThemeService>(ThemeService(), permanent: true);
-
+  Get.put(ClubController()); //Club count controller
+  Get.put(UserController()); //User count controller
   runApp(const PRecords());
 }
 // Future<void> main() async {
