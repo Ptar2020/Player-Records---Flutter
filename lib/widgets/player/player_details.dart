@@ -256,7 +256,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                                   Get.dialog(const Center(
                                       child: CircularProgressIndicator()));
                                   final fullClub = await Get.find<ApiService>()
-                                      .getClubDetailsByName(player.club!.name);
+                                      .getClubDetailsById(player.club!.id);
                                   Get.back();
                                   Get.to(() =>
                                       ClubDetailsScreen(fullClub: fullClub));

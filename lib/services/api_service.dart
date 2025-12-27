@@ -108,7 +108,7 @@ class ApiService extends GetxService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  //================GET ALL PLAYERS ============================
+//================GET ALL PLAYERS ============================
   Future<List<PlayerInClub>> getAllPlayers() async {
     final r = await dio.get('/api/android/player');
     final List data = r.data['data'] ?? [];
@@ -184,7 +184,7 @@ class ApiService extends GetxService {
     );
   }
 
-
+//========================  DELETE PLAYER=======================
   Future<void> deletePlayer(String id) async {
     try {
       final response = await dio.delete(
@@ -220,17 +220,16 @@ class ApiService extends GetxService {
     }
   }
 
-  // ================GET ALL CLUBS=============================
+// ================GET ALL CLUBS=============================
   Future<List<ClubModel>> getAllClubs() async {
-    final r = await dio.get('/api/android/club');
-    final List data = r.data['data'] ?? [];
+    final club = await dio.get('/api/android/club');
+    final List data = club.data['data'] ?? [];
     return data
         .map((e) => ClubModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
-// //==================CREATE CLUB================================
-  //================CREATE CLUB=================================
 
+//================CREATE CLUB=================================
   Future<ClubModel> createClub({
     required String name,
     required String country,
@@ -239,7 +238,7 @@ class ApiService extends GetxService {
   }) async {
     try {
       final response = await dio.post(
-        '/api/android/club',
+        '/api/android/club/new',
         data: {
           "name": name.trim(),
           "country": country.trim(),
@@ -270,14 +269,36 @@ class ApiService extends GetxService {
     }
   }
 
-//==================GET CLUB DETAILS BY NAME ===========
-  Future<ClubModel> getClubDetailsByName(String clubName) async {
-    final encoded = Uri.encodeComponent(clubName);
-    final r = await dio.get('/api/android/club/$encoded');
-    return ClubModel.fromJson(r.data['data'] as Map<String, dynamic>);
+//=========================UPDATE CLUB==========================
+  Future<ClubModel> updateClub(String _id, Map<String, dynamic> updates) async {
+    final response = await dio.patch('/api/android/club/$_id', data: updates);
+    if (response.data['success'] != true) {
+      throw Exception(response.data['error'] ?? 'Failed to update club');
+    }
+    return ClubModel.fromJson(response.data['data']);
   }
 
-  // =========================GET ALL USERS ===================
+// ========================= DELETE CLUB =========================
+  Future<void> deleteClub(String _id) async {
+    final response = await dio.delete('/api/android/club/$_id');
+    if (response.data['success'] != true) {
+      throw Exception(response.data['error'] ?? 'Failed to delete club');
+    }
+  }
+
+//==================GET CLUB DETAILS BY ID ===========
+  Future<ClubModel> getClubDetailsById(String id) async {
+    final response = await dio.get('/api/android/club/$id');
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load club details');
+    }
+
+    // Handle both { success: true, data: {...} } and raw club object
+    final json = response.data is Map<String, dynamic> ? response.data : {};
+    return ClubModel.fromJson(json);
+  }
+
+// =========================GET ALL USERS ===================
   Future<List<UserModel>> getAllUsers() async {
     final users = await dio.get('/api/android/user');
     final List data = users.data['data'] ?? [];
