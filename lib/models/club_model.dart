@@ -32,11 +32,8 @@ factory ClubModel.fromJson(Map<String, dynamic> json) {
     final String clubId = (data['_id'] ?? data['id'] ?? '').toString();
 
     final List<dynamic>? playersJson = data['players'];
-    final List<PlayerInClub>? playersList = playersJson != null
-        ? playersJson
-            .map((e) => PlayerInClub.fromJson(e as Map<String, dynamic>))
-            .toList()
-        : null;
+    final List<PlayerInClub>? playersList = playersJson?.map((e) => PlayerInClub.fromJson(e as Map<String, dynamic>))
+            .toList();
 
     return ClubModel(
       id: clubId,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'app_bar_mixins.dart';
 
-class NavPage extends StatelessWidget
+class NavPaged extends StatelessWidget
     with HasAppBarTitle, HasAppBarActions {
   final Widget child;
   @override
@@ -9,7 +9,7 @@ class NavPage extends StatelessWidget
   @override
   final List<Widget> Function(BuildContext context) appBarActions;
 
-  const NavPage({
+  const NavPaged({
     required this.child,
     required this.appBarTitle,
     List<Widget> Function(BuildContext context)? appBarActions,

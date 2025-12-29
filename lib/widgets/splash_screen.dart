@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:precords_android/widgets/bottom_menu.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

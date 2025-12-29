@@ -5,6 +5,8 @@ import 'package:dio/dio.dart' as dio;
 import 'package:get/Get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:precords_android/constants/countries.dart';
+import 'package:precords_android/constants/club_levels.dart';
 
 import '../models/club_model.dart';
 import '../services/api_service.dart';
@@ -106,7 +108,7 @@ class _ClubFormState extends State<ClubForm> {
         );
 
         Get.back(result: true);
-        Get.snackbar("Success", "Club added successfully",
+        Get.snackbar("Success", "Club added",
             backgroundColor: Colors.green, colorText: Colors.white);
       } else {
         final updates = <String, dynamic>{
@@ -125,7 +127,7 @@ class _ClubFormState extends State<ClubForm> {
         await _api.updateClub(widget.club!.id, updates);
 
         Get.back(result: true);
-        Get.snackbar("Success", "Club updated successfully",
+        Get.snackbar("Success", "Club updated",
             backgroundColor: Colors.green, colorText: Colors.white);
       }
     } catch (e) {
@@ -148,7 +150,7 @@ class _ClubFormState extends State<ClubForm> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final textColor = theme.textTheme.bodyLarge?.color;
-    final hintColor = theme.textTheme.bodyMedium?.color;
+    final hintColor = theme.textTheme.bodyMedium?.color ?? Colors.grey;
 
     final isEdit = widget.mode == ClubFormMode.edit;
     final title = isEdit ? "Edit Club" : "Add Club";
@@ -191,10 +193,7 @@ class _ClubFormState extends State<ClubForm> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: textColor,
-            ),
+                fontSize: 26, fontWeight: FontWeight.bold, color: textColor),
           ),
           const SizedBox(height: 20),
           GestureDetector(
@@ -249,48 +248,135 @@ class _ClubFormState extends State<ClubForm> {
                           v?.trim().isEmpty ?? true ? "Required" : null,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _countryCtrl,
-                      style: TextStyle(color: textColor),
-                      decoration: InputDecoration(
-                        labelText: "Country *",
-                        labelStyle: TextStyle(color: hintColor),
-                        filled: true,
-                        fillColor:
-                            isDark ? Colors.grey.shade800 : Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300),
-                        ),
-                      ),
-                      validator: (v) =>
-                          v?.trim().isEmpty ?? true ? "Required" : null,
+                    // Country — same as PlayerForm
+                    Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return const Iterable<String>.empty();
+                        }
+                        return countries.map((c) => c['name']!).where(
+                            (option) => option
+                                .toLowerCase()
+                                .contains(textEditingValue.text.toLowerCase()));
+                      },
+                      onSelected: (selection) {
+                        setState(() {
+                          _countryCtrl.text = selection;
+                        });
+                      },
+                      fieldViewBuilder: (context, textEditingController,
+                          focusNode, onFieldSubmitted) {
+                        textEditingController.text = _countryCtrl.text;
+                        textEditingController.selection =
+                            TextSelection.fromPosition(
+                          TextPosition(offset: _countryCtrl.text.length),
+                        );
+
+                        return TextFormField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          onChanged: (value) {
+                            setState(() {
+                              _countryCtrl.text = value;
+                            });
+                          },
+                          style: TextStyle(color: textColor),
+                          decoration: InputDecoration(
+                            labelText: "Country *",
+                            labelStyle: TextStyle(color: hintColor),
+                            filled: true,
+                            fillColor: isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade50,
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                  color: isDark
+                                      ? Colors.grey.shade700
+                                      : Colors.grey.shade300),
+                            ),
+                            suffixIcon: _countryCtrl.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        _countryCtrl.clear();
+                                        textEditingController.clear();
+                                      });
+                                    },
+                                  )
+                                : const Icon(Icons.arrow_drop_down),
+                          ),
+                          validator: (v) =>
+                              v?.trim().isEmpty ?? true ? "Required" : null,
+                        );
+                      },
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _levelCtrl,
-                      style: TextStyle(color: textColor),
-                      decoration: InputDecoration(
-                        labelText: "Level (e.g. Premier, Division 1)",
-                        labelStyle: TextStyle(color: hintColor),
-                        filled: true,
-                        fillColor:
-                            isDark ? Colors.grey.shade800 : Colors.grey.shade50,
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16)),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                              color: isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.grey.shade300),
-                        ),
-                      ),
+                    // Club Level — same style
+                    Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return const Iterable<String>.empty();
+                        }
+                        return clubLevels.where((option) => option
+                            .toLowerCase()
+                            .contains(textEditingValue.text.toLowerCase()));
+                      },
+                      onSelected: (selection) {
+                        setState(() {
+                          _levelCtrl.text = selection;
+                        });
+                      },
+                      fieldViewBuilder: (context, textEditingController,
+                          focusNode, onFieldSubmitted) {
+                        textEditingController.text = _levelCtrl.text;
+                        textEditingController.selection =
+                            TextSelection.fromPosition(
+                          TextPosition(offset: _levelCtrl.text.length),
+                        );
+
+                        return TextFormField(
+                          controller: textEditingController,
+                          focusNode: focusNode,
+                          onChanged: (value) {
+                            setState(() {
+                              _levelCtrl.text = value;
+                            });
+                          },
+                          style: TextStyle(color: textColor),
+                          decoration: InputDecoration(
+                            labelText: "Club Level",
+                            labelStyle: TextStyle(color: hintColor),
+                            filled: true,
+                            fillColor: isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade50,
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16)),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                  color: isDark
+                                      ? Colors.grey.shade700
+                                      : Colors.grey.shade300),
+                            ),
+                            suffixIcon: _levelCtrl.text.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      setState(() {
+                                        _levelCtrl.clear();
+                                        textEditingController.clear();
+                                      });
+                                    },
+                                  )
+                                : const Icon(Icons.arrow_drop_down),
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 40),
                     Row(
@@ -343,6 +429,848 @@ class _ClubFormState extends State<ClubForm> {
     );
   }
 }
+
+
+
+
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:dio/dio.dart' as dio;
+// import 'package:get/Get.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:precords_android/constants/countries.dart';
+// import 'package:precords_android/constants/club_levels.dart';
+
+// import '../models/club_model.dart';
+// import '../services/api_service.dart';
+
+// enum ClubFormMode { create, edit }
+
+// class ClubForm extends StatefulWidget {
+//   final ClubFormMode mode;
+//   final ClubModel? club;
+
+//   const ClubForm({
+//     super.key,
+//     required this.mode,
+//     this.club,
+//   });
+
+//   @override
+//   State<ClubForm> createState() => _ClubFormState();
+// }
+
+// class _ClubFormState extends State<ClubForm> {
+//   final _formKey = GlobalKey<FormState>();
+//   final _picker = ImagePicker();
+
+//   late TextEditingController _nameCtrl;
+//   late TextEditingController _countryCtrl;
+//   late TextEditingController _levelCtrl;
+
+//   bool _isSubmitting = false;
+//   bool _isUploadingLogo = false;
+
+//   XFile? _pickedFile;
+//   String? _logoUrl;
+
+//   final ApiService _api = Get.find<ApiService>();
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     final c = widget.club;
+
+//     _nameCtrl = TextEditingController(text: c?.name ?? "");
+//     _countryCtrl = TextEditingController(text: c?.country ?? "");
+//     _levelCtrl = TextEditingController(text: c?.level ?? "");
+
+//     _logoUrl = c?.logo;
+//   }
+
+//   Future<void> _pickAndUploadLogo() async {
+//     final picked =
+//         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+//     if (picked == null) return;
+
+//     setState(() {
+//       _pickedFile = picked;
+//       _isUploadingLogo = true;
+//     });
+
+//     try {
+//       final cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME']!;
+//       final preset = dotenv.env['CLOUDINARY_UPLOAD_PRESET']!;
+
+//       final formData = dio.FormData.fromMap({
+//         'file': await dio.MultipartFile.fromFile(picked.path),
+//         'upload_preset': preset,
+//       });
+
+//       final res = await dio.Dio().post(
+//         'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
+//         data: formData,
+//       );
+
+//       setState(() {
+//         _logoUrl = res.data['secure_url'];
+//       });
+
+//       Get.snackbar("Success", "Logo uploaded",
+//           backgroundColor: Colors.green, colorText: Colors.white);
+//     } catch (e) {
+//       Get.snackbar("Error", "Logo upload failed", backgroundColor: Colors.red);
+//     } finally {
+//       setState(() => _isUploadingLogo = false);
+//     }
+//   }
+
+//   Future<void> _showSearchableList({
+//     required String title,
+//     required List<String> items,
+//     required TextEditingController controller,
+//   }) async {
+//     String searchQuery = "";
+
+//     final selected = await showModalBottomSheet<String>(
+//       context: context,
+//       isScrollControlled: true,
+//       backgroundColor: Colors.transparent,
+//       builder: (context) {
+//         return StatefulBuilder(
+//           builder: (context, setStateModal) {
+//             final filteredItems = items
+//                 .where((item) =>
+//                     item.toLowerCase().contains(searchQuery.toLowerCase()))
+//                 .toList();
+
+//             return Container(
+//               height: MediaQuery.of(context).size.height * 0.8,
+//               decoration: const BoxDecoration(
+//                 color: Colors.white,
+//                 borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+//               ),
+//               child: Column(
+//                 children: [
+//                   Padding(
+//                     padding: const EdgeInsets.all(16),
+//                     child: Row(
+//                       children: [
+//                         IconButton(
+//                           icon: const Icon(Icons.close),
+//                           onPressed: () => Navigator.pop(context),
+//                         ),
+//                         Expanded(
+//                           child: Text(
+//                             title,
+//                             style: const TextStyle(
+//                                 fontSize: 20, fontWeight: FontWeight.bold),
+//                             textAlign: TextAlign.center,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 48),
+//                       ],
+//                     ),
+//                   ),
+//                   Padding(
+//                     padding: const EdgeInsets.symmetric(horizontal: 16),
+//                     child: TextField(
+//                       autofocus: true,
+//                       decoration: InputDecoration(
+//                         hintText: "Search $title...",
+//                         prefixIcon: const Icon(Icons.search),
+//                         suffixIcon: searchQuery.isNotEmpty
+//                             ? IconButton(
+//                                 icon: const Icon(Icons.clear),
+//                                 onPressed: () {
+//                                   setStateModal(() => searchQuery = "");
+//                                 },
+//                               )
+//                             : null,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                       ),
+//                       onChanged: (value) {
+//                         setStateModal(() => searchQuery = value);
+//                       },
+//                     ),
+//                   ),
+//                   const SizedBox(height: 16),
+//                   Expanded(
+//                     child: filteredItems.isEmpty
+//                         ? Center(child: Text("No $title found"))
+//                         : ListView.builder(
+//                             itemCount: filteredItems.length,
+//                             itemBuilder: (context, index) {
+//                               final item = filteredItems[index];
+//                               return ListTile(
+//                                 title: Text(item),
+//                                 onTap: () => Navigator.pop(context, item),
+//                               );
+//                             },
+//                           ),
+//                   ),
+//                 ],
+//               ),
+//             );
+//           },
+//         );
+//       },
+//     );
+
+//     if (selected != null) {
+//       setState(() {
+//         controller.text = selected;
+//       });
+//     }
+//   }
+
+//   Future<void> _submit() async {
+//     if (!_formKey.currentState!.validate()) return;
+
+//     setState(() => _isSubmitting = true);
+
+//     try {
+//       if (widget.mode == ClubFormMode.create) {
+//         await _api.createClub(
+//           name: _nameCtrl.text.trim(),
+//           country: _countryCtrl.text.trim(),
+//           level: _levelCtrl.text.trim().isEmpty ? null : _levelCtrl.text.trim(),
+//           logo: _logoUrl,
+//         );
+
+//         Get.back(result: true);
+//         Get.snackbar("Success", "Club added successfully",
+//             backgroundColor: Colors.green, colorText: Colors.white);
+//       } else {
+//         final updates = <String, dynamic>{
+//           'name': _nameCtrl.text.trim(),
+//           'country': _countryCtrl.text.trim(),
+//         };
+
+//         if (_levelCtrl.text.trim().isNotEmpty) {
+//           updates['level'] = _levelCtrl.text.trim();
+//         }
+
+//         if (_logoUrl != null && _logoUrl != widget.club?.logo) {
+//           updates['logo'] = _logoUrl;
+//         }
+
+//         await _api.updateClub(widget.club!.id, updates);
+
+//         Get.back(result: true);
+//         Get.snackbar("Success", "Club updated successfully",
+//             backgroundColor: Colors.green, colorText: Colors.white);
+//       }
+//     } catch (e) {
+//       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red);
+//     } finally {
+//       setState(() => _isSubmitting = false);
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _nameCtrl.dispose();
+//     _countryCtrl.dispose();
+//     _levelCtrl.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+//     final textColor = theme.textTheme.bodyLarge?.color;
+//     final hintColor = theme.textTheme.bodyMedium?.color;
+
+//     final isEdit = widget.mode == ClubFormMode.edit;
+//     final title = isEdit ? "Edit Club" : "Add Club";
+
+//     return Container(
+//       height: MediaQuery.of(context).size.height * 0.9,
+//       decoration: BoxDecoration(
+//         color: theme.scaffoldBackgroundColor,
+//         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+//       ),
+//       child: Column(
+//         children: [
+//           Padding(
+//             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+//             child: Row(
+//               children: [
+//                 const SizedBox(width: 40),
+//                 Expanded(
+//                   child: Center(
+//                     child: Container(
+//                       width: 50,
+//                       height: 5,
+//                       decoration: BoxDecoration(
+//                         color: isDark
+//                             ? Colors.grey.shade700
+//                             : Colors.grey.shade400,
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//                 IconButton(
+//                   icon: const Icon(Icons.close),
+//                   onPressed: () => Get.back(),
+//                   color: textColor,
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Text(
+//             title,
+//             style: TextStyle(
+//                 fontSize: 26, fontWeight: FontWeight.bold, color: textColor),
+//           ),
+//           const SizedBox(height: 20),
+//           GestureDetector(
+//             onTap: _pickAndUploadLogo,
+//             child: Stack(
+//               alignment: Alignment.center,
+//               children: [
+//                 CircleAvatar(
+//                   radius: 70,
+//                   backgroundColor:
+//                       isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+//                   backgroundImage: _pickedFile != null
+//                       ? FileImage(File(_pickedFile!.path))
+//                       : (_logoUrl != null ? NetworkImage(_logoUrl!) : null),
+//                   child: _pickedFile == null && _logoUrl == null
+//                       ? Icon(Icons.sports_soccer, size: 60, color: hintColor)
+//                       : null,
+//                 ),
+//                 if (_isUploadingLogo)
+//                   const CircularProgressIndicator(color: Colors.deepPurple),
+//               ],
+//             ),
+//           ),
+//           const SizedBox(height: 30),
+//           Expanded(
+//             child: SingleChildScrollView(
+//               padding: const EdgeInsets.symmetric(horizontal: 24),
+//               child: Form(
+//                 key: _formKey,
+//                 child: Column(
+//                   children: [
+//                     TextFormField(
+//                       controller: _nameCtrl,
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Club Name *",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                       ),
+//                       validator: (v) =>
+//                           v?.trim().isEmpty ?? true ? "Required" : null,
+//                     ),
+//                     const SizedBox(height: 16),
+//                     // Country Picker
+//                     TextFormField(
+//                       controller: _countryCtrl,
+//                       readOnly: true,
+//                       onTap: () {
+//                         _showSearchableList(
+//                           title: "Select Country",
+//                           items: countries.map((c) => c['name']!).toList(),
+//                           controller: _countryCtrl,
+//                         );
+//                       },
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Country *",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                         suffixIcon: _countryCtrl.text.isNotEmpty
+//                             ? IconButton(
+//                                 icon: const Icon(Icons.clear),
+//                                 onPressed: () =>
+//                                     setState(() => _countryCtrl.clear()),
+//                               )
+//                             : const Icon(Icons.arrow_drop_down),
+//                       ),
+//                       validator: (v) =>
+//                           v?.trim().isEmpty ?? true ? "Required" : null,
+//                     ),
+//                     const SizedBox(height: 16),
+//                     // Club Level Picker
+//                     TextFormField(
+//                       controller: _levelCtrl,
+//                       readOnly: true,
+//                       onTap: () {
+//                         _showSearchableList(
+//                           title: "Select Club Level",
+//                           items: clubLevels,
+//                           controller: _levelCtrl,
+//                         );
+//                       },
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Club Level",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                         suffixIcon: _levelCtrl.text.isNotEmpty
+//                             ? IconButton(
+//                                 icon: const Icon(Icons.clear),
+//                                 onPressed: () =>
+//                                     setState(() => _levelCtrl.clear()),
+//                               )
+//                             : const Icon(Icons.arrow_drop_down),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 40),
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: OutlinedButton(
+//                             onPressed: _isSubmitting ? null : () => Get.back(),
+//                             style: OutlinedButton.styleFrom(
+//                               padding: const EdgeInsets.symmetric(vertical: 16),
+//                               side: BorderSide(color: theme.dividerColor),
+//                             ),
+//                             child: Text("Cancel",
+//                                 style: TextStyle(color: textColor)),
+//                           ),
+//                         ),
+//                         const SizedBox(width: 16),
+//                         Expanded(
+//                           child: ElevatedButton(
+//                             onPressed: _isSubmitting ? null : _submit,
+//                             style: ElevatedButton.styleFrom(
+//                               backgroundColor: Colors.deepPurple,
+//                               padding: const EdgeInsets.symmetric(vertical: 16),
+//                               shape: RoundedRectangleBorder(
+//                                   borderRadius: BorderRadius.circular(16)),
+//                             ),
+//                             child: _isSubmitting
+//                                 ? const SizedBox(
+//                                     height: 20,
+//                                     width: 20,
+//                                     child: CircularProgressIndicator(
+//                                         color: Colors.white, strokeWidth: 2),
+//                                   )
+//                                 : Text(
+//                                     isEdit ? "Save Changes" : "Add Club",
+//                                     style: const TextStyle(
+//                                         fontSize: 16, color: Colors.white),
+//                                   ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 30),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
+
+
+
+
+
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:dio/dio.dart' as dio;
+// import 'package:get/Get.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// import '../models/club_model.dart';
+// import '../services/api_service.dart';
+
+// enum ClubFormMode { create, edit }
+
+// class ClubForm extends StatefulWidget {
+//   final ClubFormMode mode;
+//   final ClubModel? club;
+
+//   const ClubForm({
+//     super.key,
+//     required this.mode,
+//     this.club,
+//   });
+
+//   @override
+//   State<ClubForm> createState() => _ClubFormState();
+// }
+
+// class _ClubFormState extends State<ClubForm> {
+//   final _formKey = GlobalKey<FormState>();
+//   final _picker = ImagePicker();
+
+//   late TextEditingController _nameCtrl;
+//   late TextEditingController _countryCtrl;
+//   late TextEditingController _levelCtrl;
+
+//   bool _isSubmitting = false;
+//   bool _isUploadingLogo = false;
+
+//   XFile? _pickedFile;
+//   String? _logoUrl;
+
+//   final ApiService _api = Get.find<ApiService>();
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     final c = widget.club;
+
+//     _nameCtrl = TextEditingController(text: c?.name ?? "");
+//     _countryCtrl = TextEditingController(text: c?.country ?? "");
+//     _levelCtrl = TextEditingController(text: c?.level ?? "");
+
+//     _logoUrl = c?.logo;
+//   }
+
+//   Future<void> _pickAndUploadLogo() async {
+//     final picked =
+//         await _picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+//     if (picked == null) return;
+
+//     setState(() {
+//       _pickedFile = picked;
+//       _isUploadingLogo = true;
+//     });
+
+//     try {
+//       final cloudName = dotenv.env['CLOUDINARY_CLOUD_NAME']!;
+//       final preset = dotenv.env['CLOUDINARY_UPLOAD_PRESET']!;
+
+//       final formData = dio.FormData.fromMap({
+//         'file': await dio.MultipartFile.fromFile(picked.path),
+//         'upload_preset': preset,
+//       });
+
+//       final res = await dio.Dio().post(
+//         'https://api.cloudinary.com/v1_1/$cloudName/image/upload',
+//         data: formData,
+//       );
+
+//       setState(() {
+//         _logoUrl = res.data['secure_url'];
+//       });
+
+//       Get.snackbar("Success", "Logo uploaded",
+//           backgroundColor: Colors.green, colorText: Colors.white);
+//     } catch (e) {
+//       Get.snackbar("Error", "Logo upload failed", backgroundColor: Colors.red);
+//     } finally {
+//       setState(() => _isUploadingLogo = false);
+//     }
+//   }
+
+//   Future<void> _submit() async {
+//     if (!_formKey.currentState!.validate()) return;
+
+//     setState(() => _isSubmitting = true);
+
+//     try {
+//       if (widget.mode == ClubFormMode.create) {
+//         await _api.createClub(
+//           name: _nameCtrl.text.trim(),
+//           country: _countryCtrl.text.trim(),
+//           level: _levelCtrl.text.trim().isEmpty ? null : _levelCtrl.text.trim(),
+//           logo: _logoUrl,
+//         );
+
+//         Get.back(result: true);
+//         Get.snackbar("Success", "Club added successfully",
+//             backgroundColor: Colors.green, colorText: Colors.white);
+//       } else {
+//         final updates = <String, dynamic>{
+//           'name': _nameCtrl.text.trim(),
+//           'country': _countryCtrl.text.trim(),
+//         };
+
+//         if (_levelCtrl.text.trim().isNotEmpty) {
+//           updates['level'] = _levelCtrl.text.trim();
+//         }
+
+//         if (_logoUrl != null && _logoUrl != widget.club?.logo) {
+//           updates['logo'] = _logoUrl;
+//         }
+
+//         await _api.updateClub(widget.club!.id, updates);
+
+//         Get.back(result: true);
+//         Get.snackbar("Success", "Club updated successfully",
+//             backgroundColor: Colors.green, colorText: Colors.white);
+//       }
+//     } catch (e) {
+//       Get.snackbar("Error", e.toString(), backgroundColor: Colors.red);
+//     } finally {
+//       setState(() => _isSubmitting = false);
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _nameCtrl.dispose();
+//     _countryCtrl.dispose();
+//     _levelCtrl.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     final isDark = theme.brightness == Brightness.dark;
+//     final textColor = theme.textTheme.bodyLarge?.color;
+//     final hintColor = theme.textTheme.bodyMedium?.color;
+
+//     final isEdit = widget.mode == ClubFormMode.edit;
+//     final title = isEdit ? "Edit Club" : "Add Club";
+
+//     return Container(
+//       height: MediaQuery.of(context).size.height * 0.9,
+//       decoration: BoxDecoration(
+//         color: theme.scaffoldBackgroundColor,
+//         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+//       ),
+//       child: Column(
+//         children: [
+//           Padding(
+//             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+//             child: Row(
+//               children: [
+//                 const SizedBox(width: 40),
+//                 Expanded(
+//                   child: Center(
+//                     child: Container(
+//                       width: 50,
+//                       height: 5,
+//                       decoration: BoxDecoration(
+//                         color: isDark
+//                             ? Colors.grey.shade700
+//                             : Colors.grey.shade400,
+//                         borderRadius: BorderRadius.circular(10),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//                 IconButton(
+//                   icon: const Icon(Icons.close),
+//                   onPressed: () => Get.back(),
+//                   color: textColor,
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Text(
+//             title,
+//             style: TextStyle(
+//               fontSize: 26,
+//               fontWeight: FontWeight.bold,
+//               color: textColor,
+//             ),
+//           ),
+//           const SizedBox(height: 20),
+//           GestureDetector(
+//             onTap: _pickAndUploadLogo,
+//             child: Stack(
+//               alignment: Alignment.center,
+//               children: [
+//                 CircleAvatar(
+//                   radius: 70,
+//                   backgroundColor:
+//                       isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+//                   backgroundImage: _pickedFile != null
+//                       ? FileImage(File(_pickedFile!.path))
+//                       : (_logoUrl != null ? NetworkImage(_logoUrl!) : null),
+//                   child: _pickedFile == null && _logoUrl == null
+//                       ? Icon(Icons.sports_soccer, size: 60, color: hintColor)
+//                       : null,
+//                 ),
+//                 if (_isUploadingLogo)
+//                   const CircularProgressIndicator(color: Colors.deepPurple),
+//               ],
+//             ),
+//           ),
+//           const SizedBox(height: 30),
+//           Expanded(
+//             child: SingleChildScrollView(
+//               padding: const EdgeInsets.symmetric(horizontal: 24),
+//               child: Form(
+//                 key: _formKey,
+//                 child: Column(
+//                   children: [
+//                     TextFormField(
+//                       controller: _nameCtrl,
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Club Name *",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                       ),
+//                       validator: (v) =>
+//                           v?.trim().isEmpty ?? true ? "Required" : null,
+//                     ),
+//                     const SizedBox(height: 16),
+//                     TextFormField(
+//                       controller: _countryCtrl,
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Country *",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                       ),
+//                       validator: (v) =>
+//                           v?.trim().isEmpty ?? true ? "Required" : null,
+//                     ),
+//                     const SizedBox(height: 16),
+//                     TextFormField(
+//                       controller: _levelCtrl,
+//                       style: TextStyle(color: textColor),
+//                       decoration: InputDecoration(
+//                         labelText: "Level (e.g. Premier, Division 1)",
+//                         labelStyle: TextStyle(color: hintColor),
+//                         filled: true,
+//                         fillColor:
+//                             isDark ? Colors.grey.shade800 : Colors.grey.shade50,
+//                         border: OutlineInputBorder(
+//                             borderRadius: BorderRadius.circular(16)),
+//                         enabledBorder: OutlineInputBorder(
+//                           borderRadius: BorderRadius.circular(16),
+//                           borderSide: BorderSide(
+//                               color: isDark
+//                                   ? Colors.grey.shade700
+//                                   : Colors.grey.shade300),
+//                         ),
+//                       ),
+//                     ),
+//                     const SizedBox(height: 40),
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: OutlinedButton(
+//                             onPressed: _isSubmitting ? null : () => Get.back(),
+//                             style: OutlinedButton.styleFrom(
+//                               padding: const EdgeInsets.symmetric(vertical: 16),
+//                               side: BorderSide(color: theme.dividerColor),
+//                             ),
+//                             child: Text("Cancel",
+//                                 style: TextStyle(color: textColor)),
+//                           ),
+//                         ),
+//                         const SizedBox(width: 16),
+//                         Expanded(
+//                           child: ElevatedButton(
+//                             onPressed: _isSubmitting ? null : _submit,
+//                             style: ElevatedButton.styleFrom(
+//                               backgroundColor: Colors.deepPurple,
+//                               padding: const EdgeInsets.symmetric(vertical: 16),
+//                               shape: RoundedRectangleBorder(
+//                                   borderRadius: BorderRadius.circular(16)),
+//                             ),
+//                             child: _isSubmitting
+//                                 ? const SizedBox(
+//                                     height: 20,
+//                                     width: 20,
+//                                     child: CircularProgressIndicator(
+//                                         color: Colors.white, strokeWidth: 2),
+//                                   )
+//                                 : Text(
+//                                     isEdit ? "Save Changes" : "Add Club",
+//                                     style: const TextStyle(
+//                                         fontSize: 16, color: Colors.white),
+//                                   ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 30),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+
+
+
+
+
 
 
 // import 'dart:io';

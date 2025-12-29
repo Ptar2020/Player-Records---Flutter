@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
+import 'package:precords_android/models/position_model.dart';
 import '../models/club_model.dart';
 import '../models/player_model.dart';
 import '../models/user_model.dart';
@@ -108,7 +109,77 @@ class ApiService extends GetxService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-//================GET ALL PLAYERS ============================
+// ======================== CREATE POSITION ========================
+  Future<PositionModel> createPosition({
+    required String name,
+    String? shortName,
+  }) async {
+    try {
+      final response = await dio.post(
+        '/api/android/position/new',
+        data: {
+          "name": name.trim(),
+          if (shortName != null && shortName.trim().isNotEmpty)
+            "shortName": shortName.trim(),
+        },
+      );
+
+      if (response.data['success'] != true) {
+        throw Exception(response.data['error'] ?? 'Failed to create position');
+      }
+
+      final data = response.data['data'];
+      return PositionModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final msg = e.response?.data['error'] ?? e.message ?? 'Network error';
+      throw Exception('Create position failed: $msg');
+    }
+  }
+
+// ======================== UPDATE POSITION ========================
+  Future<PositionModel> updatePosition(
+    String id, {
+    required String name,
+    String? shortName,
+  }) async {
+    try {
+      final response = await dio.patch(
+        '/api/android/position/$id',
+        data: {
+          "name": name.trim(),
+          if (shortName != null && shortName.trim().isNotEmpty)
+            "shortName": shortName.trim(),
+          if (shortName != null && shortName.trim().isEmpty) "shortName": null,
+        },
+      );
+
+      if (response.data['success'] != true) {
+        throw Exception(response.data['error'] ?? 'Failed to update position');
+      }
+
+      final data = response.data['data'];
+      return PositionModel.fromJson(data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      final msg = e.response?.data['error'] ?? e.message ?? 'Network error';
+      throw Exception('Update position failed: $msg');
+    }
+  }
+
+// ======================== DELETE POSITION ========================
+  Future<void> deletePosition(String id) async {
+    try {
+      final response = await dio.delete('/api/android/position/$id');
+
+      if (response.data['success'] != true) {
+        throw Exception(response.data['error'] ?? 'Failed to delete position');
+      }
+    } on DioException catch (e) {
+      final msg = e.response?.data['error'] ?? e.message ?? 'Network error';
+      throw Exception('Delete position failed: $msg');
+    }
+  }
+
+//========================  GET ALL PLAYERS ============================
   Future<List<PlayerInClub>> getAllPlayers() async {
     final r = await dio.get('/api/android/player');
     final List data = r.data['data'] ?? [];
@@ -224,7 +295,7 @@ class ApiService extends GetxService {
   Future<List<ClubModel>> getAllClubs() async {
     final club = await dio.get('/api/android/club');
     final List data = club.data['data'] ?? [];
-    print("CLUB DATA FROM /api/android/club - ${data}");
+    print("CLUB DATA FROM /api/android/club - $data");
     return data
         .map((e) => ClubModel.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -271,8 +342,8 @@ class ApiService extends GetxService {
   }
 
 //=========================UPDATE CLUB==========================
-  Future<ClubModel> updateClub(String _id, Map<String, dynamic> updates) async {
-    final response = await dio.patch('/api/android/club/$_id', data: updates);
+  Future<ClubModel> updateClub(String id, Map<String, dynamic> updates) async {
+    final response = await dio.patch('/api/android/club/$id', data: updates);
     if (response.data['success'] != true) {
       throw Exception(response.data['error'] ?? 'Failed to update club');
     }
@@ -280,8 +351,8 @@ class ApiService extends GetxService {
   }
 
 // ========================= DELETE CLUB =========================
-  Future<void> deleteClub(String _id) async {
-    final response = await dio.delete('/api/android/club/$_id');
+  Future<void> deleteClub(String id) async {
+    final response = await dio.delete('/api/android/club/$id');
     if (response.data['success'] != true) {
       throw Exception(response.data['error'] ?? 'Failed to delete club');
     }
