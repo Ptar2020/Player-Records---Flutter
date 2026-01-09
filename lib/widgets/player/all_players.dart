@@ -121,7 +121,7 @@ class AllPlayersState extends State<AllPlayers> {
                 onTap: () {
                   Get.to(() => PlayerDetails(player: fullPlayer),
                       transition: Transition.zoom,
-                      duration: const Duration(milliseconds: 400));
+                      duration: const Duration(milliseconds: 300));
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(14),
@@ -190,8 +190,7 @@ class AllPlayersState extends State<AllPlayers> {
                                     color: Colors.deepPurple.shade50,
                                     borderRadius: BorderRadius.circular(12)),
                                 child: Text(
-                                  player.position!.shortName ??
-                                      player.position!.name,
+                                  player.position!.name,
                                   style: const TextStyle(
                                       fontSize: 12.5,
                                       fontWeight: FontWeight.w600,

@@ -37,7 +37,7 @@ class UserModel {
     return UserModel(
       id: json["_id"] ?? json["id"],
       username: json["username"] ?? "",
-      name: json["name"] ?? "", // from backend
+      name: json["name"] ?? "", 
       email: json["email"],
       phone: json["phone"],
       club: parsedClubId,

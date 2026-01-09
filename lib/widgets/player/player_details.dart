@@ -7,7 +7,7 @@ import 'package:precords_android/services/api_service.dart';
 import '../../forms/player_form.dart';
 
 class PlayerDetails extends StatefulWidget {
-  final Player player; // ← Back to 'player' to match all existing calls
+  final Player player;
 
   const PlayerDetails({super.key, required this.player});
 
@@ -234,7 +234,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                         context,
                         icon: Icons.people,
                         label: "Club",
-                        value: player.club?.name ?? "Free Agent",
+                        value: player.club?.name ?? "Unknown",
                         trailing: player.club?.logo != null
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
@@ -307,9 +307,7 @@ class _PlayerDetailsState extends State<PlayerDetails> {
                                       color: Colors.deepPurple.shade100,
                                       borderRadius: BorderRadius.circular(20)),
                                   child: Text(
-                                    player.position?.shortName ??
-                                        player.position?.name ??
-                                        "Not specified",
+                                    player.position?.name ?? "Not specified",
                                     style: TextStyle(
                                         fontSize: isTablet ? 20 : 18,
                                         fontWeight: FontWeight.bold,
@@ -418,6 +416,3 @@ class _PlayerDetailsState extends State<PlayerDetails> {
         : row;
   }
 }
-
-
-

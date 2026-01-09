@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:precords_android/widgets/bottom_menu.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -39,7 +40,6 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    // ← This animation was causing opacity > 1.0 → crash!
     _float = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
@@ -66,7 +66,6 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF6D28D9),
-
       body: Center(
         child: FadeTransition(
           opacity: _fadeIn,
@@ -112,7 +111,6 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
 
                 const SizedBox(height: 100), // ← safe spacing
-                // Floating dots — now safe from overflow & opacity crash
                 AnimatedBuilder(
                   animation: _float,
                   builder: (context, child) {
